@@ -413,16 +413,19 @@ async function refreshStatus() {
   checks.push(`${"SharedArrayBuffer" in window ? "✓" : "✕"} SharedArrayBuffer（WASM 多线程必需）`);
   checks.push(`${navigator.hardwareConcurrency ? "✓" : "✕"} CPU 核数=${navigator.hardwareConcurrency || "未知"}（建议 ≥4 核，内存 ≥8GB）`);
 
-  // ---------- 静态部署版：远端模型配置 + 可达探测（替代后端状态接口） ----------
-  // 主源 HuggingFace，备源 hf-mirror（CORS/206 已验证，见 README）；size 为发布时实测。
-  // 本站 5Mbps 小水管只出页面+胶水（约 1.2MB），700MB+ 模型由访客浏览器直读远端。
+  // ---------- 静态部署版：远端模型配置 + 可达探测 ----------
+  // 国内优先走备源 hf-mirror（HF 直连在部分地区慢），主备自动回退；CORS/206 已验证，见 README。
+  // size 为发布时实测。本站 5Mbps 小水管只出页面+胶水（约 1.2MB），700MB+ 模型由访客浏览器直读远端。
   const REMOTE_MODELS = [
     { name: "qwen3-asr-0.6b-q5_k_m.gguf", size: 767867648,
-      url: "https://huggingface.co/OpenVoiceOS/qwen3-asr-0.6b-q5-k-m/resolve/main/qwen3-asr-0.6b-q5_k_m.gguf",
-      mirror: "https://hf-mirror.com/OpenVoiceOS/qwen3-asr-0.6b-q5-k-m/resolve/main/qwen3-asr-0.6b-q5_k_m.gguf" },
+      url: "https://hf-mirror.com/OpenVoiceOS/qwen3-asr-0.6b-q5-k-m/resolve/main/qwen3-asr-0.6b-q5_k_m.gguf",
+      mirror: "https://huggingface.co/OpenVoiceOS/qwen3-asr-0.6b-q5-k-m/resolve/main/qwen3-asr-0.6b-q5_k_m.gguf" },
     { name: "qwen3-asr-0.6b-q4_k_m.gguf", size: 685284096,
-      url: "https://huggingface.co/OpenVoiceOS/qwen3-asr-0.6b-q4-k-m/resolve/main/qwen3-asr-0.6b-q4_k_m.gguf",
-      mirror: "https://hf-mirror.com/OpenVoiceOS/qwen3-asr-0.6b-q4-k-m/resolve/main/qwen3-asr-0.6b-q4_k_m.gguf" },
+      url: "https://hf-mirror.com/OpenVoiceOS/qwen3-asr-0.6b-q4-k-m/resolve/main/qwen3-asr-0.6b-q4_k_m.gguf",
+      mirror: "https://huggingface.co/OpenVoiceOS/qwen3-asr-0.6b-q4-k-m/resolve/main/qwen3-asr-0.6b-q4_k_m.gguf" },
+    { name: "Qwen3-ASR-0.6B.Q4_K_M.gguf(mradermacher)", size: 484216288,
+      url: "https://hf-mirror.com/mradermacher/Qwen3-ASR-0.6B-GGUF/resolve/main/Qwen3-ASR-0.6B.Q4_K_M.gguf",
+      mirror: "https://huggingface.co/mradermacher/Qwen3-ASR-0.6B-GGUF/resolve/main/Qwen3-ASR-0.6B.Q4_K_M.gguf" },
   ];
   try {
     const [jsH, wasmH] = await Promise.all([
